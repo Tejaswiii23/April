@@ -1,0 +1,32 @@
+class Solution:
+    def survivedRobotsHealths(self, positions, healths, directions):
+        robots = sorted(
+            [(positions[i], healths[i], directions[i], i) for i in range(len(positions))]
+        )
+        
+        stack = []
+        
+        for pos, hp, d, idx in robots:
+            if d == 'R':
+                stack.append([pos, hp, d, idx])
+            else:
+                while stack and stack[-1][2] == 'R' and hp > 0:
+                    if stack[-1][1] < hp:
+                        hp -= 1
+                        stack.pop()
+                    elif stack[-1][1] == hp:
+                        stack.pop()
+                        hp = 0
+                        break
+                    else:
+                        stack[-1][1] -= 1
+                        hp = 0
+                        break
+                if hp > 0:
+                    stack.append([pos, hp, d, idx])
+        
+        ans = []
+        stack.sort(key=lambda x: x[3])
+        for _, hp, _, _ in stack:
+            ans.append(hp)
+        return ans
