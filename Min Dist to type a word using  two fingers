@@ -1,0 +1,30 @@
+class Solution:
+    def minimumDistance(self, word: str) -> int:
+        pos = {chr(ord('A')+i): (i//6, i%6) if i < 24 else (4, i-24) for i in range(26)}
+
+        from functools import lru_cache
+        INF = 10**9
+
+        @lru_cache(None)
+        def dp(i, f1, f2):
+            if i == len(word): 
+                return 0
+            c = word[i]
+            cx, cy = pos[c]
+
+            res = INF
+            if f1 is None:
+                res = min(res, dp(i+1, c, f2))
+            else:
+                x, y = pos[f1]
+                res = min(res, abs(x-cx)+abs(y-cy) + dp(i+1, c, f2))
+
+            if f2 is None:
+                res = min(res, dp(i+1, f1, c))
+            else:
+                x, y = pos[f2]
+                res = min(res, abs(x-cx)+abs(y-cy) + dp(i+1, f1, c))
+
+            return res
+
+        return dp(0, None, None)
