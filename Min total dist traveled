@@ -1,0 +1,25 @@
+class Solution:
+    def minimumTotalDistance(self, robot, factory):
+        robot.sort()
+        factory.sort()
+
+        # Expand factory positions by capacity
+        arr = []
+        for p, c in factory:
+            arr += [p] * c
+
+        m, n = len(robot), len(arr)
+        INF = 10**30
+
+        dp = [[INF] * (n + 1) for _ in range(m + 1)]
+        dp[0][0] = 0
+
+        for i in range(m + 1):
+            for j in range(n + 1):
+                if i < m and j < n:
+                    dp[i + 1][j + 1] = min(dp[i + 1][j + 1],
+                                           dp[i][j] + abs(robot[i] - arr[j]))
+                if j < n:
+                    dp[i][j + 1] = min(dp[i][j + 1], dp[i][j])
+
+        return dp[m][n]
