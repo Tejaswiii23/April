@@ -1,0 +1,44 @@
+from collections import defaultdict
+import bisect
+from typing import List
+
+class Solution:
+    def solveQueries(self, nums: List[int], queries: List[int]) -> List[int]:
+        n = len(nums)
+        
+        # Group indices by value
+        index_map = defaultdict(list)
+        for i, v in enumerate(nums):
+            index_map[v].append(i)
+        
+        answer = []
+        
+        for q in queries:
+            val = nums[q]
+            indices = index_map[val]
+            
+            # If only one occurrence (itself), return -1
+            if len(indices) == 1:
+                answer.append(-1)
+                continue
+            
+            # Binary search for position of q in sorted indices list
+            pos = bisect.bisect_left(indices, q)
+            
+            min_dist = float('inf')
+            
+            # Check next index (circular)
+            next_pos = (pos + 1) % len(indices)
+            j = indices[next_pos]
+            dist = abs(q - j)
+            min_dist = min(min_dist, min(dist, n - dist))
+            
+            # Check previous index (circular)
+            prev_pos = (pos - 1) % len(indices)
+            j = indices[prev_pos]
+            dist = abs(q - j)
+            min_dist = min(min_dist, min(dist, n - dist))
+            
+            answer.append(min_dist)
+        
+        return answer
