@@ -1,0 +1,19 @@
+class Solution:
+    def minMirrorPairDistance(self, nums: List[int]) -> int:
+        def reverse_num(x):
+            return int(str(x)[::-1])
+        
+        seen = {}  # maps reversed_value -> last index seen
+        min_dist = float('inf')
+        
+        for i, num in enumerate(nums):
+            rev = reverse_num(num)
+            
+            # Check if current number's reverse was seen before
+            if num in seen:
+                min_dist = min(min_dist, i - seen[num])
+            
+            # Store the reverse of current number with its index
+            seen[rev] = i
+        
+        return min_dist if min_dist != float('inf') else -1
