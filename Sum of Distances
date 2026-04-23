@@ -1,0 +1,28 @@
+class Solution:
+    def distance(self, nums):
+        from collections import defaultdict
+        
+        pos = defaultdict(list)
+        n = len(nums)
+        
+        for i, v in enumerate(nums):
+            pos[v].append(i)
+
+        arr = [0] * n
+        
+        for v, indices in pos.items():
+            m = len(indices)
+            if m == 1:
+                continue
+            
+            prefix = [0] * (m + 1)
+            for i in range(m):
+                prefix[i + 1] = prefix[i] + indices[i]
+            
+            for k in range(m):
+                i = indices[k]
+                left = k * indices[k] - prefix[k]
+                right = (prefix[m] - prefix[k + 1]) - (m - k - 1) * indices[k]
+                arr[i] = left + right
+        
+        return arr
