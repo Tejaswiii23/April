@@ -1,0 +1,77 @@
+from typing import List
+import bisect
+
+class Solution:
+    def maxDistance(self, side: int, points: List[List[int]], k: int) -> int:
+        
+        # Convert (x, y) on boundary to 1D perimeter position (clockwise from (0,0))
+        def to_pos(x, y):
+            if y == 0:        return x               # bottom: left to right
+            if x == side:     return side + y         # right: bottom to top
+            if y == side:     return 2 * side + (side - x)  # top: right to left
+            return 3 * side + (side - y)              # left: top to bottom
+        
+        perimeter = 4 * side
+        
+        # Convert all points to 1D positions and sort
+        pos = sorted(to_pos(x, y) for x, y in points)
+        n = len(pos)
+        
+        # Check if we can place k points with min distance >= d
+        def can_place(d):
+            # Try each point as the starting point
+            for start_idx in range(n):
+                count = 1
+                cur = pos[start_idx]
+                first = pos[start_idx]
+                idx = start_idx
+                
+                while count < k:
+                    # Find next position that is >= cur + d (mod perimeter)
+                    target = cur + d
+                    
+                    if target > perimeter + first - d:
+                        break  # Can't complete the circle
+                    
+                    # Search in pos for next point
+                    # We need to handle wrap-around
+                    nxt_pos = target % perimeter
+                    
+                    if target < perimeter:
+                        # No wrap: search in [idx+1, n-1]
+                        j = bisect.bisect_left(pos, target, idx + 1, n)
+                        if j < n:
+                            idx = j
+                            cur = pos[idx]
+                        else:
+                            break
+                    else:
+                        # Wrap around
+                        wrap_target = target - perimeter
+                        j = bisect.bisect_left(pos, wrap_target, 0, start_idx)
+                        if j < start_idx:
+                            idx = j
+                            cur = pos[idx] + perimeter  # virtual position
+                        else:
+                            break
+                    count += 1
+                
+                if count == k:
+                    # Check last -> first distance
+                    dist = (first + perimeter - cur % perimeter) % perimeter
+                    if dist >= d:
+                        return True
+            return False
+        
+        # Binary search on answer
+        lo, hi = 1, perimeter // k
+        ans = 0
+        while lo <= hi:
+            mid = (lo + hi) // 2
+            if can_place(mid):
+                ans = mid
+                lo = mid + 1
+            else:
+                hi = mid - 1
+        
+        return ans
